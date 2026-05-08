@@ -1,0 +1,27 @@
+# Deny everything by default
+*
+
+# Allow specific source files
+!main.c
+!simd.c
+!simd.h
+!Makefile
+
+# Allow project docs
+!README.md
+!LICENSE
+
+# Allow container build
+!Dockerfile
+
+# Allow benchmark folder
+!benchmark/
+!benchmark/docker-compose.yml
+!benchmark/haproxy.cfg
+!benchmark/nginx.conf
+!benchmark/backend.py
+!benchmark/bench.py
+!benchmark/README.md
+
+# Allow gitignore itself
+!.gitignore
