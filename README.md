@@ -40,19 +40,19 @@ docker run --security-opt seccomp:unconfined \
 ## Como funciona
 
 ```
-                    cliente TCP :PORT
-                          │
-             ┌────────────▼────────────┐
-             │   Passa-ou-Repassa      │
-             │       (1 core)          │
-             │       io_uring          │
-             │       AVX2 SIMD         │
-             └────────────┬────────────┘
-                          │
-            ┌─────────────┼─────────────┐
-            │             │             │
-      UDS /s1.sock   UDS /s2.sock   UDS /s3.sock
-     round-robin puro, sem locks, sem atomics
+                      cliente TCP :PORT
+                            │
+               ┌────────────────────────────┐
+               │   Passa-ou-Repassa      │
+               │       (1 core)          │
+               │       io_uring          │
+               │       AVX2 SIMD         │
+               └────────────────────────────┘
+                            │
+              ┌──────────────┼──────────────┐
+              │              │              │
+        UDS /s1.sock   UDS /s2.sock   UDS /s3.sock
+       round-robin puro, sem locks, sem atomics
 ```
 
 - Listener TCP em porta configurável
@@ -81,7 +81,7 @@ docker run --security-opt seccomp:unconfined \
 ┌─────────────────────────────────────────────────────────────┐
 │                      Event Loop (1 core)                    │
 │                                                             │
-│  ┌──────────────┐    io_uring_submit_and_wait()            │
+│  ┌──────────────┐    io_uring_submit_and_wait()             │
 │  │ Multishot    │ ──────────────────────────────────────▶   │
 │  │ Accept       │                                           │
 │  └──────────────┘                                           │
