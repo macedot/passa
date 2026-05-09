@@ -390,7 +390,7 @@ int main(int argc, char **argv)
 	if (port_env)
 		port = atoi(port_env);
 
-	buf_size = 65536;
+	buf_size = 4096;
 	const char *buf_env = getenv("BUF_SIZE");
 	if (buf_env)
 		buf_size = (size_t) atol(buf_env);
