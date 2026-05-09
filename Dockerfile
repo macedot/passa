@@ -17,6 +17,6 @@ COPY --from=build /src/passa /proxy
 COPY --from=build /usr/lib/x86_64-linux-gnu/liburing.so.2 /usr/lib/x86_64-linux-gnu/liburing.so.2
 
 ENV PORT=8080
-ENV BUF_SIZE=65536
+ENV BUF_SIZE=4096
 
 ENTRYPOINT ["/proxy"]
