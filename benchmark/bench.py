@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
-"""Benchmark TCP→UDS proxies: passa vs haproxy vs nginx."""
+"""Benchmark passa TCP→UDS proxy."""
 
 import socket, threading, time, statistics, sys
 
-HOSTS = {
-    "passa":   ("passa",   8080),
-    "haproxy": ("haproxy", 8081),
-    "nginx":   ("nginx",   8082),
-}
-
+HOST = ("passa", 8080)
 PAYLOAD = b"X" * 1024
 WARMUP  = 10
 REQUESTS = 500
@@ -78,40 +73,27 @@ def bench_one(name, host, port, requests, payload):
 
 def main():
     print("=" * 50)
-    print("  TCP → UDS Proxy Benchmark")
+    print("  TCP → UDS Proxy Benchmark — passa")
     print(f"  Payload: {len(PAYLOAD)} bytes  |  Conns: {REQUESTS}  |  Parallel: {CONCURRENCY}")
     print("=" * 50)
 
-    results = {}
-    for name, (host, port) in HOSTS.items():
-        # Retry connectivity a few times (containers may still be starting)
-        reachable = False
-        for _ in range(10):
-            try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(2.0)
-                s.connect((host, port))
-                s.close()
-                reachable = True
-                break
-            except Exception:
-                time.sleep(0.5)
-        if not reachable:
-            print(f"\n[!] {name} not reachable at {host}:{port}, skipping")
-            continue
+    name, host, port = "passa", HOST[0], HOST[1]
+    reachable = False
+    for _ in range(10):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(2.0)
+            s.connect((host, port))
+            s.close()
+            reachable = True
+            break
+        except Exception:
+            time.sleep(0.5)
+    if not reachable:
+        print(f"\n[!] {name} not reachable at {host}:{port}")
+        return
 
-        rps, p99 = bench_one(name, host, port, REQUESTS, PAYLOAD)
-        results[name] = (rps, p99)
-        time.sleep(1)
-
-    if len(results) >= 2:
-        print(f"\n{'='*50}")
-        print("  SUMMARY")
-        print(f"{'='*50}")
-        baseline = max(results.values(), key=lambda x: x[0])
-        for name, (rps, p99) in sorted(results.items(), key=lambda x: -x[1][0]):
-            rel = rps / baseline[0] * 100
-            print(f"  {name:10s}  RPS={rps:8.0f}  p99={p99:6.3f}ms  ({rel:.0f}%)")
+    bench_one(name, host, port, REQUESTS, PAYLOAD)
 
 if __name__ == "__main__":
     main()
