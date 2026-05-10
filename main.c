@@ -337,6 +337,9 @@ static __attribute__((hot)) void handle_cqe(struct io_uring_cqe * restrict cqe)
 
 	if (op == OP_RECV_C2B) {
 		if (__builtin_expect(cqe->res <= 0, 0)) {
+			/* client closed write side → propagate EOF to backend */
+			if (c->backend_fd >= 0)
+				shutdown(c->backend_fd, SHUT_WR);
 			c->closing = 1;
 			conn_maybe_close(c);
 			return;
@@ -357,6 +360,9 @@ static __attribute__((hot)) void handle_cqe(struct io_uring_cqe * restrict cqe)
 
 	if (op == OP_RECV_B2C) {
 		if (__builtin_expect(cqe->res <= 0, 0)) {
+			/* backend closed write side → propagate EOF to client */
+			if (c->client_fd >= 0)
+				shutdown(c->client_fd, SHUT_WR);
 			c->closing = 1;
 			conn_maybe_close(c);
 			return;
